@@ -15,16 +15,6 @@ Koa.use( ctx => {
     const responseStream = createStream()
     // rendering result stream
     const renderStream = createRenderStream( responseStream )
-        // .onChunk( chunk => {
-        //     responseStream.push( chunk )
-        // } )
-        // .on( 'data', chunk => {
-        // } )
-        // .on( 'end', () => {
-        //     stream.push( '</body></html>' )
-        //     responseStream.push( null )
-        // } )
-    
 
     ctx.body = responseStream
     ctx.type = 'html'

@@ -15,8 +15,8 @@ export const useContext = ( context ) => {
         throw `Expected a context, got ${ context }`
     }
 
-    const { contextId } = context
+    const { contextId, value } = context
 
-    return contexts.get( contextId )
+    return contexts.get( contextId ) || value
 
 }

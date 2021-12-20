@@ -11,6 +11,7 @@ import {
 import { createStream } from './utils.mjs'
 import Suspense from './suspense.mjs'
 import { genRandomId, sanitizeString } from './utils.mjs'
+import { setRuntime } from './runtime.mjs'
 
 const __reduce_contents = contents =>
     contents.reduce( ( acc, node ) => {
@@ -27,7 +28,9 @@ const __push_contents_stream = ( contents, stream, options ) =>
     contents.forEach( ( content ) => toStream( content, stream, options ) )
 
 
-export const toStream = ( node, stream, options ) => {
+export const toStream = ( node, stream, srcOptions ) => {
+    const { init, ...options } = srcOptions
+    setRuntime( options )
     stream = stream || createStream()
 
     const { nodeType, contents, props } = node
@@ -48,9 +51,7 @@ export const toStream = ( node, stream, options ) => {
 
                 if ( e instanceof Suspense ) {
 
-
                     const suspenseId = genRandomId( 'suspense-' )
-                    console.debug( 'found pending promise' )
                     const newFallback = extendNode( fallback, {
                         id: suspenseId,
                     } )
@@ -102,9 +103,19 @@ export const toStream = ( node, stream, options ) => {
         }
         break
         case CONTEXT_PROVIDER: {
-            const { contents, context: { value,  } } = node
-            __push_contents_stream( contents, stream, options )
-        } 
+            const { contents, context: { value, contextId } } = node
+            const { contexts } = options
+            const newContexts = new Map( contexts )
+
+            newContexts.set( contextId, value )
+
+            const newOptions = {
+                ...options,
+                contexts: newContexts
+            }
+
+            __push_contents_stream( contents, stream, newOptions )
+        }
         break
         default: {
             const { __noClose, ...restProps } = props
@@ -118,7 +129,7 @@ export const toStream = ( node, stream, options ) => {
 
     }
 
-    if ( options.init ) {
+    if ( init ) {
         stream.tryEnd()
     }
     return stream

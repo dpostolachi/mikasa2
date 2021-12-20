@@ -72,6 +72,9 @@ export const jsx = ( nodeType, props = undefined, contents = undefined ) => {
     if ( typeof nodeType !== 'string' ) {
 
         if ( nodeType instanceof ContextProvider ) {
+            const { value } = props
+            nodeType.value = value || nodeType.value
+
             return {
                 nodeType: CONTEXT_PROVIDER,
                 contents,

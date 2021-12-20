@@ -20,16 +20,13 @@ class RenderStream {
     }
 
     tryEnd( force = false ) {
-        console.log( `try end ${ this.pendingTasks.length }` )
         if ( force || !this.pendingTasks.length ) {
-            console.log( 'ENDING' )
             this.respStream.push( '</body></html>' )
             this.respStream.push( null )
         }
     }
 
     suspend( e ) {
-        console.log( 'suspend on' )
         // push to dependencies
         const { pendingTasks } = this
         pendingTasks.push( e )
@@ -37,7 +34,6 @@ class RenderStream {
         // clear from dependencies
         e.finally( () => {
 
-            console.log( 'suspend off' )
             const index = pendingTasks.indexOf( e )
             pendingTasks.splice( index, 1 )
 
@@ -56,7 +52,7 @@ export const createRenderStream = ( respStream ) => {
 
 export const createStream = () => {
     return new ReadStream( {
-        read: chunk => console.log( 'chunk', chunk ),
+        read: chunk => {},
         encoding: 'utf-8',
     } )
 }
