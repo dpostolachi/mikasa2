@@ -47,7 +47,7 @@ export const createContext = ( defaultValue ) => {
     return new ContextProvider( { value: defaultValue } )
 }
 
-export const jsx = ( nodeType, props = undefined, contents = undefined ) => {
+export const jsx = ( nodeType, props = {}, contents = [] ) => {
     const isFn = typeof nodeType === 'function'
 
     if ( Array.isArray( contents ) ) {
@@ -112,7 +112,7 @@ export const jsx = ( nodeType, props = undefined, contents = undefined ) => {
 
     return {
         nodeType,
-        props: props || {},
+        props: props,
         contents,
     }
 

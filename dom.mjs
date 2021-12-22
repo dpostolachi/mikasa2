@@ -95,10 +95,11 @@ export const toStream = ( node, stream, srcOptions ) => {
         case DEP_INJECT: {
             const { props: { suspenseId } } = node
 
-            stream.push( `<script>` )
-            stream.push( `document.getElementById('${suspenseId}').innerHTML = \`` )
+            stream.push( `<script id="script:${ suspenseId }">` )
+            stream.push( `document.getElementById('${suspenseId}').outerHTML = \`` )
             __push_contents_stream( contents, stream, options )
             stream.push( `\`;` )
+            stream.push( `document.getElementById('script:${suspenseId}').remove();` )
             stream.push( `</script>` )
         }
         break

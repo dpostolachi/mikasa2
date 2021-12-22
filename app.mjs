@@ -7,6 +7,8 @@ import Suspense from './suspense.mjs'
 import {
     useContext
 } from './hooks.mjs'
+import { generateName } from './mock/index.mjs'
+import { Router, RouterContext } from './router/index.mjs'
 
 const MockDBContext = createContext( {
     db: {},
@@ -23,87 +25,106 @@ const useSuspense = ( key, data ) => {
 
             setTimeout( () => {
                 resolve()
-            }, 3000 )
+            }, Math.random() * 2000 )
         } )
     }
 
     return value
 }
 
-const DisplayName = () => {
-        const name = useSuspense( 'heyo', 'Dima' )
-
-        return jsx( 'div', {}, [
-            name,
-            jsx( SUSPENSE_NODE, {
-                fallback: jsx( 'h1', {}, [ 'loading...' ] )
-            }, [
-                jsx( DisplayName2, {} )
-            ] )
-        ] )
-}
 
 const UserList = () => {
 
-    const userList = useSuspense( 'heyo', [
-        'Random',
-        'List',
-        'Of',
-        'People',
-    ] )
+    const randomNames = new Array( 5 + Math.ceil( Math.random() * 10 ) )
+        .fill()
+        .map( () => generateName() )
 
-    return jsx( 'ul', {}, userList.map( user => {
+    const userList = useSuspense( 'userList', randomNames )
+
+    return jsx( 'ul', {
+        class: 'list-group'
+    }, userList.map( ( user, index ) => {
         return jsx( SUSPENSE_NODE, {
-            fallback: jsx( 'span', {}, [ 'loading...' ] )
+            fallback: jsx( 'li', {
+                class: 'list-group-item'
+            }, [ `loading #User${ index }` ] )
         }, [
-            // jsx( DisplayName, {} )
+            jsx( DisplayName2, { user }, [] )
         ] )
     } ) )
 
 }
 
-const DisplayName2 = () => {
-    const name = useSuspense( 'heyo2', 'Dima2' )
+const DisplayName2 = ( { user } ) => {
+    const name = useSuspense( user, user )
 
-    return jsx( 'h1', {}, [ name ] )
+    return jsx( 'li', {
+        class: 'list-group-item',
+    }, [ name ] )
 }
 
-export const App = () => {
+const App = ( { url } ) => {
 
     return jsx( MockDBContext, {
         value: { db: {} },
     }, [
-        jsx( 'html', {
-            __noClose: true,
+        jsx( RouterContext, {
+            url,
         }, [
-            jsx( 'head', {}, [
-                jsx( 'title', {}, [ 'hello world' ] ),
-                jsx( 'style', {}, [ `
-                    body {
-                        margin: 0;
-                        font-family: sans-serif;
-                        background: #fefefe;
-                    }
-                ` ] ),
-                jsx( 'link', {
-                    rel: 'stylesheet',
-                    href: 'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css',
-                }, [] )
-            ] ),
-            jsx( 'body', {
+            jsx( 'html', {
                 __noClose: true,
             }, [
-                jsx( 'div', {
-                    class: 'container',
+                jsx( 'head', {}, [
+                    jsx( 'title', {}, [ 'hello world' ] ),
+                    jsx( 'style', {}, [ `
+                        body {
+                            margin: 0;
+                            font-family: sans-serif;
+                            background: #fefefe;
+                        }
+                    ` ] ),
+                    jsx( 'link', {
+                        rel: 'stylesheet',
+                        href: 'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css',
+                    }, [] )
+                ] ),
+                jsx( 'body', {
+                    __noClose: true,
                 }, [
-                    jsx( 'h1', {
-                        className: 'heading'
-                    }, [ 'User list' ] ),
-                    jsx( SUSPENSE_NODE, {
-                        fallback: jsx( 'h1', {}, [ 'loading...' ] )
-                    }, [
-                        // jsx( 'div', {}, [ 'hello' ] )
-                        jsx( UserList, {} ),
+                    jsx( Router, {}, [
+                        jsx( 'div', {
+                            class: 'container',
+                            path: '/users'
+                        }, [
+                            jsx( 'h1', {}, [ 'Async example' ] ),
+                            jsx( 'h2', {
+                                className: 'heading'
+                            }, [ `User list` ] ),
+                            jsx( SUSPENSE_NODE, {
+                                fallback: jsx( 'h5', {}, [ 'loading...' ] )
+                            }, [
+                                jsx( UserList, {}, [] ),
+                            ] ),
+                            jsx( 'p', {}, [
+                                'Go to: ',
+                                jsx( 'a', {
+                                    href: '/',
+                                }, [ 'home' ] ),
+                            ] ),
+                        ] ),
+                        jsx( 'div', {
+                            class: 'container',
+                            path: '/',
+                        }, [
+                            jsx( 'h1', {}, [ 'Home page' ] ),
+                            jsx( 'h2', {}, [ 'Just a random page' ] ),
+                            jsx( 'p', {}, [
+                                'Go to: ',
+                                jsx( 'a', {
+                                    href: '/users',
+                                }, [ 'user list' ] ),
+                            ] ),
+                        ] )
                     ] )
                 ] )
             ] )
@@ -111,3 +132,5 @@ export const App = () => {
     ] )
 
 }
+
+export default App
